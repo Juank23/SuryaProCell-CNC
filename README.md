@@ -1,2 +1,2 @@
 # SuryaProCell-CNC
-CNC, Arduino, OpenCV, DC Motor
+CNC, Arduino, OpenCV, DC Motor or Servo
