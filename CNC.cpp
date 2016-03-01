@@ -88,6 +88,7 @@ double StringToDouble(string s){
 }
 //---------- end function convertion string to double ----------
 
+//++++++++++ Read Config.txt ++++++++++++++
 void bacaKonfig(){
 	string baris;
 	ifstream Konfig ("config.txt");
@@ -109,13 +110,16 @@ void bacaKonfig(){
 	}//if(Konfig.is_open()){
 	Konfig.close();
 }
+//---------- End Read Config.txt ----------
 
+//++++++++++ Save Konfig ++++++++++
 void simpanKonfig(){
 	ofstream outfile;
 	outfile.open ("config.txt");
 	outfile << "X"<< stepPermmX << " Y" << stepPermmY << " Z" << stepPermmZ << " S" << speed ;
 	outfile.close();
 }
+//---------- End Save Konfig ----------
 
 //+++++++++++++++++++++++ Start readport ++++++++++++++++++++++++++
 char  readport(void){
