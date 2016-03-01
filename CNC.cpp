@@ -461,7 +461,7 @@ int main(){
 	namedWindow("Config", CV_WINDOW_NORMAL);
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 100)
+	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 1000)
 	cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
 	cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
 	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
