@@ -114,27 +114,27 @@ void cekSerial(){
       Serial.write('2');
     }//end if c = 2
     
-    if(c == 4){ //if processing send 4 SetpointX + 1;
+    if(c == 4){ //if computer send 4 SetpointX + 1;
       setpointX++;
     }//end if c = 3
     
-    if(c == 8){ //if processing send 8 SetpointX - 1;
+    if(c == 8){ //if computer send 8 SetpointX - 1;
       setpointX--;
     }//end if c = 4
     
-    if(c == 16){ //if processing send 16 SetpointY + 1;
+    if(c == 16){ //if computer send 16 SetpointY + 1;
       setpointY++;
     }//end if c = 5
     
-    if(c == 32){ //if processing send 32 SetpointY - 1;
+    if(c == 32){ //if computer send 32 SetpointY - 1;
       setpointY--;
     }//end if c = 6
     
-    if(c == 64){ //if processing send 64 SetpointZ + 1;
+    if(c == 64){ //if computer send 64 SetpointZ + 1;
       setpointZ++;
     }//end if c = 7
     
-    if(c == 128){ //if processing send 128 SetpointZ - 1;
+    if(c == 128){ //if computer send 128 SetpointZ - 1;
       setpointZ--;
     }//end if c = 8
     
