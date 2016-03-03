@@ -4,7 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include <dirent.h>
 
 #include <errno.h>
 #include <termios.h>
@@ -28,6 +30,11 @@ int HEIGHT = 500;
 
 int fd = 0;
 struct termios TermOpt;
+
+DIR *pdir = NULL;
+struct dirent *pent = NULL;
+const char * dirPath = "./data/";
+char FullFileName[1000];
 
 int stepPermmX;
 int stepPermmY;
@@ -67,6 +74,7 @@ double lastdrawstepZ;
 double deep;
 
 int warna;
+int eksekusi = 0;
 
 //++++++++++ function convertion integer to string ++++++++++
 string intToString(int number){
@@ -87,6 +95,10 @@ double StringToDouble(string s){
 	return d;
 }
 //---------- end function convertion string to double ----------
+
+void bacaDir(){
+	
+}
 
 //++++++++++ Read Config.txt ++++++++++++++
 void bacaKonfig(){
@@ -198,15 +210,48 @@ double interpolasi(double x, double x1, double x2, double y1, double y2)
 }
 //---------- end interpolation ----------
 
-//++++++++++++++ procedure drawGcode +++++++++++++++++++++++
-void execute(int mode){
+//++++++++++ open directory data ++++++++++
+void openDir(){
+	cout << "========== File ==========\n";
+	pdir = opendir (dirPath);
+	if (pdir == NULL){
+		cout <<"ERROR! pdir could not be initialised correctly\n";
+	}
 
-	//image
+	string file[100];
+	int j = 0;
+	while (pent = readdir(pdir)){
+		if (pent == NULL){
+			cout << "ERROR! pent could not be initialised correctly\n";
+		}
+		if(strlen(pent->d_name) > 3){
+			file[j] = pent->d_name;
+			cout << "["<< j << "]" << file[j] << "\n";
+			j++;
+		}
+	}
+	closedir (pdir);
+	cout << "========== ++++ ==========\n";
+	cout << "Silahkan pilih nomor file: ";
+
+	int f;
+	cin >> f;
+
+	const char * FileName = file[f].c_str();
+	//char FullFileName[1000];
+	strcpy(FullFileName, dirPath);
+	strcat(FullFileName, FileName);
+	//FileName = file[f];
+	cout << "Membuka " << FullFileName << '\n';
+}
+//---------- end open directory ----------
+
+
+//++++++++++++++ procedure drawGcode +++++++++++++++++++++++
+void drawGcode(){
 	Mat image = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
-	
-	//open file
 	string baris, baris1;
-	ifstream myfile ("a.nc");
+	ifstream myfile (FullFileName);
 	if(myfile.is_open()){
 		while(getline(myfile, baris)){
 			stringstream streamBaris (baris);
@@ -230,23 +275,60 @@ void execute(int mode){
 			lastpointX = pointX;
 			lastpointY = pointY;
 		}//while(getline(myfile, baris))
-		myfile.close();
+		//myfile.close();
 	}//if(myfile.is_open())
 	else{
 		cout << "Tidak dapat membuka file" << '\n';
 	}//else if(myfile.is_open())
 
-if(mode == 2){
+	while (eksekusi == 0){
 
-	// image
+		key = waitKey(100);
+
+		if(key == 101){ //tombol 'e' ditekan
+			sendport(1); // spindle ON
+		}
+		if(key == 99) { //tombol 'c' ditekan. 
+			sendport(2); // spindle OFF
+		}
+		if(key == 100){ //tombol 'd' ditekan
+			sendport(4); // X axis ++
+		}
+		if(key == 97) { //tombol 'a' ditekan. 
+			sendport(8); // X axis --
+		}
+		if(key == 119) { //tombol 'w' ditekan. 
+			sendport(16); // Y axis ++
+		}
+		if(key == 120) { //tombol 'x' ditekan. 
+			sendport(32); // Y axis --
+		}
+		if(key == 113) { //tombol 'q' ditekan. 
+			sendport(64); // Z axis ++
+		}
+		if(key == 122) { //tombol 'z' ditekan. 
+			sendport(128); // Z axis --
+		}
+		if(key == 115) { // tombol 's' ditekan
+			eksekusi = 1; //start arduino
+		}
+		if(key == 102) { // tombol 'f' ditekan
+			simpanKonfig(); //simpan konfig
+		}
+		if (key == 27) { //esc
+            		cout << "Keluar" << endl;
+            		break; 
+       		}
+	
+        } //while (eksekusi == 0)
+
 	Mat image2;					
 	image.copyTo(image2);
 
-	//open file
-	string baris, baris1;
-	ifstream myfile ("a.nc");
-	if(myfile.is_open()){
-		while(getline(myfile, baris)){
+	//baris, baris1;
+	ifstream myfile1 (FullFileName);
+	if(myfile1.is_open()){
+		while(getline(myfile1, baris)){
 			stringstream streamBaris (baris);
 			while(getline(streamBaris, baris1, ' ')){
 				if(baris1=="M3"){
@@ -370,11 +452,11 @@ if(mode == 2){
 					del = 1000/speed; // ms per step
 
 					//akselerasi
-					if(maxStep >= 20){
-						if(i<=20){
-							accl = interpolasi(i, 0, 20, del*2, del);
-						}else if(i>=maxStep-20){
-							accl = interpolasi(i, maxStep-20, maxStep, del, del*2);
+					if(maxStep >= stepPermmX * 20){
+						if(i <= (stepPermmX * 20)){
+							accl = interpolasi(i, 0, (stepPermmX * 20), (del*2), del);
+						}else if(i>=maxStep-(stepPermmX * 20)){
+							accl = interpolasi(i, (maxStep-(stepPermmX * 20)), maxStep, del, (del*2));
 						}else{
 							accl = del;
 						}
@@ -416,7 +498,6 @@ if(mode == 2){
 		}//while(getline(myfile, baris))
 		myfile.close();
 	}//if(myfile.is_open())
-}//if(mode == 2)
 }
 
 //---------------- end drawGcode ------------------------------
@@ -436,8 +517,11 @@ int main(){
 	
 	while(readport() != 'R');
 	cout << "Arduino Ready\n";
+	
+	//Open Directory
+	openDir();
 
-	//image
+	//++++++++++ image menu ++++++++++
 	Mat imageCmd = Mat::zeros(HEIGHT+200, WIDTH+200, CV_8UC3);
 	putText(imageCmd, "----- MENU -----", Point(10,20), FONT_HERSHEY_COMPLEX, 0.75, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "d : Menggerakkan X axis ke arah positif", Point(10,40), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
@@ -453,8 +537,7 @@ int main(){
 	putText(imageCmd, "f : Simpan Konfigurasi", Point(10,240), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "esc : Keluar", Point(10,260), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	imshow("Command", imageCmd);
-
-	execute(1);
+	//---------- end image menu ----------
 
 	//create a window called "Control"
 	//namedWindow("Control", CV_WINDOW_AUTOSIZE);
@@ -464,48 +547,10 @@ int main(){
 	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 1000)
 	cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
 	cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
-	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
+	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);	
 
-    	while (true){
-
-		key = waitKey(100);
-
-		if(key == 101){ //tombol 'e' ditekan
-			sendport(1); // spindle ON
-		}
-		if(key == 99) { //tombol 'c' ditekan. 
-			sendport(2); // spindle OFF
-		}
-		if(key == 100){ //tombol 'd' ditekan
-			sendport(4); // X axis ++
-		}
-		if(key == 97) { //tombol 'a' ditekan. 
-			sendport(8); // X axis --
-		}
-		if(key == 119) { //tombol 'w' ditekan. 
-			sendport(16); // Y axis ++
-		}
-		if(key == 120) { //tombol 'x' ditekan. 
-			sendport(32); // Y axis --
-		}
-		if(key == 113) { //tombol 'q' ditekan. 
-			sendport(64); // Z axis ++
-		}
-		if(key == 122) { //tombol 'z' ditekan. 
-			sendport(128); // Z axis --
-		}
-		if(key == 115) { // tombol 's' ditekan
-			execute(2); //start arduino
-		}
-		if(key == 102) { // tombol 'f' ditekan
-			simpanKonfig(); //simpan konfig
-		}
-		if (key == 27) { //esc
-            		cout << "Keluar" << endl;
-            		break; 
-       		}
-	
-        } //end while (true)
+	//draw GCode
+	drawGcode();
 	
    	return 0;
 
