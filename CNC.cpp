@@ -275,7 +275,7 @@ void drawGcode(){
 			lastpointX = pointX;
 			lastpointY = pointY;
 		}//while(getline(myfile, baris))
-		//myfile.close();
+		myfile.close();
 	}//if(myfile.is_open())
 	else{
 		cout << "Tidak dapat membuka file" << '\n';
@@ -496,7 +496,7 @@ void drawGcode(){
 			drawlastpointZ = drawpointZ;
 			}//if(drawpointX != drawlastpointX || drawpointY != drawlastpointY || drawpointZ != drawlastpointZ)
 		}//while(getline(myfile, baris))
-		myfile.close();
+		myfile1.close();
 	}//if(myfile.is_open())
 }
 
