@@ -96,10 +96,6 @@ double StringToDouble(string s){
 }
 //---------- end function convertion string to double ----------
 
-void bacaDir(){
-	
-}
-
 //++++++++++ Read Config.txt ++++++++++++++
 void bacaKonfig(){
 	string baris;
@@ -154,9 +150,6 @@ void sendport(unsigned char ValueToSend){
   if (n < 0){
     cout<< "write() of value failed!\n";
   }
-  //else{
-    //while(readport() != 'r');
-  //}
   
 }
 //------------------------ End sendport ----------------------------------
@@ -213,6 +206,7 @@ double interpolasi(double x, double x1, double x2, double y1, double y2)
 //++++++++++ open directory data ++++++++++
 void openDir(){
 	cout << "========== File ==========\n";
+	cout << "Alamat: " << dirPath << '\n';
 	pdir = opendir (dirPath);
 	if (pdir == NULL){
 		cout <<"ERROR! pdir could not be initialised correctly\n";
@@ -224,10 +218,12 @@ void openDir(){
 		if (pent == NULL){
 			cout << "ERROR! pent could not be initialised correctly\n";
 		}
-		if(strlen(pent->d_name) > 3){
-			file[j] = pent->d_name;
-			cout << "["<< j << "]" << file[j] << "\n";
-			j++;
+		if(strlen(pent->d_name) > 4){
+			if(memcmp(pent->d_name + strlen(pent->d_name)-4, ".ngc",4) == 0){
+				file[j] = pent->d_name;
+				cout << "["<< j << "]" << file[j] << "\n";
+				j++;
+			}
 		}
 	}
 	closedir (pdir);
@@ -238,10 +234,8 @@ void openDir(){
 	cin >> f;
 
 	const char * FileName = file[f].c_str();
-	//char FullFileName[1000];
 	strcpy(FullFileName, dirPath);
 	strcat(FullFileName, FileName);
-	//FileName = file[f];
 	cout << "Membuka " << FullFileName << '\n';
 }
 //---------- end open directory ----------
@@ -316,8 +310,9 @@ void drawGcode(){
 			simpanKonfig(); //simpan konfig
 		}
 		if (key == 27) { //esc
+			system("clear");
             		cout << "Keluar" << endl;
-            		break; 
+            		exit(0); 
        		}
 	
         } //while (eksekusi == 0)
@@ -335,13 +330,13 @@ void drawGcode(){
 					spindle = 1;
 					sendport(1);
 					while(readport() != '1');
-					cout << "Spindle ON" << '\n';
+					//cout << "Spindle ON" << '\n';
 				}
 				if(baris1=="M5"){					
 					spindle = 0;
 					sendport(2);
 					while(readport() != '2');
-					cout << "Spindle OFF" << '\n';
+					//cout << "Spindle OFF" << '\n';
 				}
 				if(baris1.substr(0,1)=="X"){
 					drawpointX = round(StringToDouble(baris1.substr(1)) * stepPermmX);
@@ -483,6 +478,7 @@ void drawGcode(){
 							waitKey(1000);	
 						}
 						if (key == 27) { //esc
+							system("clear");
             						cout << "Keluar" << endl;
             						exit(0); 
        						}
@@ -497,31 +493,17 @@ void drawGcode(){
 			}//if(drawpointX != drawlastpointX || drawpointY != drawlastpointY || drawpointZ != drawlastpointZ)
 		}//while(getline(myfile, baris))
 		myfile1.close();
+		Mat image = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+		putText(image, "Selesai", Point(20,20), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
+		putText(image, "'Esc' untuk keluar", Point(20,40), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
+		putText(image, "'s' 2X untuk mengulangi", Point(20,60), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
+		imshow("SuryaProCell-CNC", image);
 	}//if(myfile.is_open())
 }
 
 //---------------- end drawGcode ------------------------------
 
-//++++++++++ main ++++++++++
-int main(){
-
-	system("clear");
-	bacaKonfig();
-	openport();
-
-	/*open serial
-	FILE* serial = fopen("/dev/ttyACM0", "w");
-	if (serial == 0) {
-		cout << "Tidak dapat membuka serial port" << '\n';
-	}*/
-	
-	while(readport() != 'R');
-	cout << "Arduino Ready\n";
-	
-	//Open Directory
-	openDir();
-
-	//++++++++++ image menu ++++++++++
+void menu(){
 	Mat imageCmd = Mat::zeros(HEIGHT+200, WIDTH+200, CV_8UC3);
 	putText(imageCmd, "----- MENU -----", Point(10,20), FONT_HERSHEY_COMPLEX, 0.75, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "d : Menggerakkan X axis ke arah positif", Point(10,40), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
@@ -537,8 +519,9 @@ int main(){
 	putText(imageCmd, "f : Simpan Konfigurasi", Point(10,240), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "esc : Keluar", Point(10,260), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	imshow("Command", imageCmd);
-	//---------- end image menu ----------
+}
 
+void BuatTrackbar(){
 	//create a window called "Control"
 	//namedWindow("Control", CV_WINDOW_AUTOSIZE);
 	namedWindow("Config", CV_WINDOW_NORMAL);
@@ -547,11 +530,89 @@ int main(){
 	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 1000)
 	cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
 	cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
-	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);	
+	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
+}
+
+void alur(){
+	
+	
+
+	
+
+	
+}
+
+//++++++++++ main ++++++++++
+int main(){
+
+	system("clear");
+	bacaKonfig();
+	openport();
+
+	/*open serial
+	FILE* serial = fopen("/dev/ttyACM0", "w");
+	if (serial == 0) {
+		cout << "Tidak dapat membuka serial port" << '\n';
+	}*/
+
+	cout << "Menunggu Arduino ...\n";	
+	while(readport() != 'R');
+	cout << "Arduino Siap Gan !\n\n";	
+
+	//Open Directory
+	openDir();
+
+	//Open Menu
+	menu();
+
+	BuatTrackbar();
 
 	//draw GCode
 	drawGcode();
+	eksekusi = 0;
+
+	while (true){
+
+		key = waitKey(100);
+
+		if(key == 101){ //tombol 'e' ditekan
+			sendport(1); // spindle ON
+		}
+		if(key == 99) { //tombol 'c' ditekan. 
+			sendport(2); // spindle OFF
+		}
+		if(key == 100){ //tombol 'd' ditekan
+			sendport(4); // X axis ++
+		}
+		if(key == 97) { //tombol 'a' ditekan. 
+			sendport(8); // X axis --
+		}
+		if(key == 119) { //tombol 'w' ditekan. 
+			sendport(16); // Y axis ++
+		}
+		if(key == 120) { //tombol 'x' ditekan. 
+			sendport(32); // Y axis --
+		}
+		if(key == 113) { //tombol 'q' ditekan. 
+			sendport(64); // Z axis ++
+		}
+		if(key == 122) { //tombol 'z' ditekan. 
+			sendport(128); // Z axis --
+		}
+		if(key == 115) { // tombol 's' ditekan
+			drawGcode();
+		}
+		if(key == 102) { // tombol 'f' ditekan
+			simpanKonfig(); //simpan konfig
+		}
+		if (key == 27) { //esc
+			system("clear");
+            		cout << "Keluar" << endl;
+            		exit(0); 
+       		}
 	
+        } //while (true)
+
    	return 0;
 
 }
