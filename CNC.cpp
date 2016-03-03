@@ -496,7 +496,7 @@ void drawGcode(){
 		Mat image = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 		putText(image, "Selesai", Point(20,20), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 		putText(image, "'Esc' untuk keluar", Point(20,40), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
-		putText(image, "'s' 2X untuk mengulangi", Point(20,60), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
+		putText(image, "'s' untuk mengulangi", Point(20,60), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 		imshow("SuryaProCell-CNC", image);
 	}//if(myfile.is_open())
 }
@@ -569,7 +569,6 @@ int main(){
 
 	//draw GCode
 	drawGcode();
-	eksekusi = 0;
 
 	while (true){
 
