@@ -36,9 +36,9 @@ struct dirent *pent = NULL;
 const char * dirPath = "./data/";
 char FullFileName[1000];
 
-int stepPermmX;
-int stepPermmY;
-int stepPermmZ;
+double stepPermmX = 6500/135;
+double stepPermmY = 6500/135;
+double stepPermmZ = 6500/135;
 
 int jeda = 0;
 int speed;
@@ -102,6 +102,7 @@ void bacaKonfig(){
 	ifstream Konfig ("config.txt");
 	if(Konfig.is_open()){
 		while(getline(Konfig, baris, ' ')){
+/*
 			if(baris.substr(0,1)=="X" ){
 				stepPermmX = int(StringToDouble(baris.substr(1)));
 			}
@@ -111,6 +112,7 @@ void bacaKonfig(){
 			if(baris.substr(0,1)=="Z" ){
 				stepPermmZ = int(StringToDouble(baris.substr(1)));
 			}
+*/
 			if(baris.substr(0,1)=="S" ){
 				speed = int(StringToDouble(baris.substr(1)));
 			}
@@ -124,7 +126,7 @@ void bacaKonfig(){
 void simpanKonfig(){
 	ofstream outfile;
 	outfile.open ("config.txt");
-	outfile << "X"<< stepPermmX << " Y" << stepPermmY << " Z" << stepPermmZ << " S" << speed ;
+	outfile << " S" << speed ;
 	outfile.close();
 }
 //---------- End Save Konfig ----------
@@ -348,7 +350,7 @@ void drawGcode(){
 					//cout << "Y" << pointY << '\n';
 				}
 				if(baris1.substr(0,1)=="Z"){
-					drawpointZ = round(StringToDouble(baris1.substr(1))  * stepPermmZ);
+					drawpointZ = round(StringToDouble(baris1.substr(1)) * stepPermmZ);
 					//cout << "Z" << pointZ << '\n';
 				}
 				
@@ -528,9 +530,9 @@ void BuatTrackbar(){
 
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 1000)
-	cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
-	cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
-	cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
+	//cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
+	//cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
+	//cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
 }
 
 void alur(){
