@@ -36,9 +36,9 @@ struct dirent *pent = NULL;
 const char * dirPath = "./data/";
 char FullFileName[1000];
 
-double stepPermmX = 6500/135;
-double stepPermmY = 6500/135;
-double stepPermmZ = 6500/135;
+double stepPermmX;
+double stepPermmY;
+double stepPermmZ;
 
 int jeda = 0;
 int speed;
@@ -72,6 +72,7 @@ double lastdrawstepX;
 double lastdrawstepY = HEIGHT*stepPermmY;
 double lastdrawstepZ;
 double deep;
+double encoderX = 0, encoderY = 0, encoderZ = 0;
 
 int warna;
 int eksekusi = 0;
@@ -102,17 +103,16 @@ void bacaKonfig(){
 	ifstream Konfig ("config.txt");
 	if(Konfig.is_open()){
 		while(getline(Konfig, baris, ' ')){
-/*
+
 			if(baris.substr(0,1)=="X" ){
-				stepPermmX = int(StringToDouble(baris.substr(1)));
+				stepPermmX = StringToDouble(baris.substr(1));
 			}
 			if(baris.substr(0,1)=="Y" ){
-				stepPermmY = int(StringToDouble(baris.substr(1)));
+				stepPermmY = StringToDouble(baris.substr(1));
 			}
 			if(baris.substr(0,1)=="Z" ){
-				stepPermmZ = int(StringToDouble(baris.substr(1)));
+				stepPermmZ = StringToDouble(baris.substr(1));
 			}
-*/
 			if(baris.substr(0,1)=="S" ){
 				speed = int(StringToDouble(baris.substr(1)));
 			}
@@ -133,26 +133,23 @@ void simpanKonfig(){
 
 //+++++++++++++++++++++++ Start readport ++++++++++++++++++++++++++
 char  readport(void){
-  int n;
+	int n;
 	char buff;
-  n = read(fd, &buff, 1);
-  if(n > 0){
-    return buff;
-  }
-  return 0;
+	n = read(fd, &buff, 1);
+	if(n > 0){
+		return buff;
+	}
+	return 0;
 }
 //------------------------ End readport ----------------------------------
 
 //+++++++++++++++++++++++ Start sendport ++++++++++++++++++++++++++
 void sendport(unsigned char ValueToSend){
-  int n;
-
-  n = write(fd, &ValueToSend, 1);
-  
-  if (n < 0){
-    cout<< "write() of value failed!\n";
-  }
-  
+	int n;
+	n = write(fd, &ValueToSend, 1);
+	if (n < 0){
+		cout<< "write() of value failed!\n";
+	}  
 }
 //------------------------ End sendport ----------------------------------
 
@@ -279,7 +276,7 @@ void drawGcode(){
 
 	while (eksekusi == 0){
 
-		key = waitKey(100);
+		key = waitKey(1);
 
 		if(key == 101){ //tombol 'e' ditekan
 			sendport(1); // spindle ON
@@ -289,28 +286,40 @@ void drawGcode(){
 		}
 		if(key == 100){ //tombol 'd' ditekan
 			sendport(4); // X axis ++
+			encoderX++;
+			cout << "X" << encoderX << '\n';
 		}
 		if(key == 97) { //tombol 'a' ditekan. 
 			sendport(8); // X axis --
+			encoderX--;
+			cout << "X" << encoderX << '\n';
 		}
 		if(key == 119) { //tombol 'w' ditekan. 
 			sendport(16); // Y axis ++
+			encoderY++;
+			cout << "Y" << encoderY << '\n';
 		}
 		if(key == 120) { //tombol 'x' ditekan. 
 			sendport(32); // Y axis --
+			encoderY--;
+			cout << "Y" << encoderY << '\n';
 		}
 		if(key == 113) { //tombol 'q' ditekan. 
 			sendport(64); // Z axis ++
+			encoderZ++;
+			cout << "Z" << encoderZ << '\n';
 		}
 		if(key == 122) { //tombol 'z' ditekan. 
 			sendport(128); // Z axis --
+			encoderZ--;
+			cout << "Z" << encoderZ << '\n';
 		}
 		if(key == 115) { // tombol 's' ditekan
 			eksekusi = 1; //start arduino
 		}
-		if(key == 102) { // tombol 'f' ditekan
-			simpanKonfig(); //simpan konfig
-		}
+		//if(key == 102) { // tombol 'f' ditekan
+			//simpanKonfig(); //simpan konfig
+		//}
 		if (key == 27) { //esc
 			system("clear");
             		cout << "Keluar" << endl;
@@ -376,38 +385,26 @@ void drawGcode(){
 
 					if(intstepX>lastintstepX){
 						sendport(4);
-						//waitKey(1);
-						//while(readport() != 'X');
 						lastintstepX = intstepX;
 					}
 					if(intstepX<lastintstepX){
 						sendport(8);
-						//waitKey(1);
-						//while(readport() != 'X');
 						lastintstepX = intstepX;
 					}
 					if(intstepY>lastintstepY){
 						sendport(16);
-						//waitKey(1);
-						//while(readport() != 'Y');
 						lastintstepY = intstepY;
 					}
 					if(intstepY<lastintstepY){
 						sendport(32);
-						//waitKey(1);
-						//while(readport() != 'Y');
 						lastintstepY = intstepY;
 					}
 					if(intstepZ>lastintstepZ){
 						sendport(64);
-						//waitKey(1);
-						//while(readport() != 'Z');
 						lastintstepZ = intstepZ;
 					}
 					if(intstepZ<lastintstepZ){
 						sendport(128);
-						//waitKey(1);
-						//while(readport() != 'Z');
 						lastintstepZ = intstepZ;
 					}
 					cout << "X" << lastintstepX << " Y" << lastintstepY << " Z" << lastintstepZ << " S" << spindle << '\n';
@@ -518,7 +515,7 @@ void menu(){
 	putText(imageCmd, "c : Mematikan Bor", Point(10,180), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "s : Mulai mesin", Point(10,200), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "p : Jeda Mesin", Point(10,220), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
-	putText(imageCmd, "f : Simpan Konfigurasi", Point(10,240), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
+	//putText(imageCmd, "f : Simpan Konfigurasi", Point(10,240), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	putText(imageCmd, "esc : Keluar", Point(10,260), FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 255, 0), 1, 8);
 	imshow("Command", imageCmd);
 }
@@ -533,15 +530,6 @@ void BuatTrackbar(){
 	//cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
 	//cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
 	//cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
-}
-
-void alur(){
-	
-	
-
-	
-
-	
 }
 
 //++++++++++ main ++++++++++
@@ -574,7 +562,7 @@ int main(){
 
 	while (true){
 
-		key = waitKey(100);
+		key = waitKey(1);
 
 		if(key == 101){ //tombol 'e' ditekan
 			sendport(1); // spindle ON
@@ -584,28 +572,40 @@ int main(){
 		}
 		if(key == 100){ //tombol 'd' ditekan
 			sendport(4); // X axis ++
+			encoderX++;
+			cout << "X" << encoderX << '\n';
 		}
 		if(key == 97) { //tombol 'a' ditekan. 
 			sendport(8); // X axis --
+			encoderX--;
+			cout << "X" << encoderX << '\n';
 		}
 		if(key == 119) { //tombol 'w' ditekan. 
 			sendport(16); // Y axis ++
+			encoderY++;
+			cout << "Y" << encoderY << '\n';
 		}
 		if(key == 120) { //tombol 'x' ditekan. 
 			sendport(32); // Y axis --
+			encoderY--;
+			cout << "Y" << encoderY << '\n';
 		}
 		if(key == 113) { //tombol 'q' ditekan. 
 			sendport(64); // Z axis ++
+			encoderZ++;
+			cout << "Z" << encoderZ << '\n';
 		}
 		if(key == 122) { //tombol 'z' ditekan. 
 			sendport(128); // Z axis --
+			encoderZ--;
+			cout << "Z" << encoderZ << '\n';
 		}
 		if(key == 115) { // tombol 's' ditekan
 			drawGcode();
 		}
-		if(key == 102) { // tombol 'f' ditekan
-			simpanKonfig(); //simpan konfig
-		}
+		//if(key == 102) { // tombol 'f' ditekan
+			//simpanKonfig(); //simpan konfig
+		//}
 		if (key == 27) { //esc
 			system("clear");
             		cout << "Keluar" << endl;
