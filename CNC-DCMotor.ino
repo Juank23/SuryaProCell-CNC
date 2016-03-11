@@ -1,5 +1,5 @@
 #include <PID.h>
-#include <encoder1.h>
+#include <encoder.h>
 #include <Servo.h>
 
 #define spindle 13
@@ -10,9 +10,9 @@
 #define motorZ1 10
 #define motorZ2 11
 
-encoder myencoderX(A0,A1);
-encoder myencoderY(A2,A3);
-encoder myencoderZ(A4,A5);
+encoder myencoderX(A0,A1,INPUTPULLUP);
+encoder myencoderY(A2,A3,INPUTPULLUP);
+encoder myencoderZ(A4,A5,INPUTPULLUP);
 
 PID myPIDX(127, 0.1, 0); // KP, KI, KD
 PID myPIDY(127, 0.1, 0); // KP, KI, KD
