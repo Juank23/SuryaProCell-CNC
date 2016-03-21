@@ -1,4 +1,3 @@
-
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -340,13 +339,11 @@ void drawGcode(){
 				if(baris1=="M3"){
 					spindle = 1;
 					sendport(1);
-					while(readport() != '1');
 					//cout << "Spindle ON" << '\n';
 				}
 				if(baris1=="M5"){					
 					spindle = 0;
 					sendport(2);
-					while(readport() != '2');
 					//cout << "Spindle OFF" << '\n';
 				}
 				if(baris1.substr(0,1)=="X"){
@@ -407,12 +404,12 @@ void drawGcode(){
 						sendport(128);
 						lastintstepZ = intstepZ;
 					}
-					cout << "X" << lastintstepX << " Y" << lastintstepY << " Z" << lastintstepZ << " S" << spindle << '\n';
+					//cout << "X" << lastintstepX << " Y" << lastintstepY << " Z" << lastintstepZ << " S" << spindle << '\n';
 
-					drawstepX = interpolasi(stepX, 0, WIDTH*stepPermmY, 0, WIDTH);
-					drawstepY = interpolasi(stepY, 0, HEIGHT*stepPermmY, 0, HEIGHT);
-					reversedrawstepY = interpolasi(drawstepY, 0, HEIGHT, HEIGHT, 0);
-					drawstepZ = interpolasi(stepZ, 0, HEIGHT*stepPermmZ, 0, HEIGHT);
+					drawstepX = round(interpolasi(stepX, 0, WIDTH*stepPermmY, 0, WIDTH));
+					drawstepY = round(interpolasi(stepY, 0, HEIGHT*stepPermmY, 0, HEIGHT));
+					reversedrawstepY = round(interpolasi(drawstepY, 0, HEIGHT, HEIGHT, 0));
+					drawstepZ = round(interpolasi(stepZ, 0, HEIGHT*stepPermmZ, 0, HEIGHT));
 
 					deep = interpolasi(drawstepZ, 0, -10, 255, 0);
 
