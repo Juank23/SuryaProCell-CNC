@@ -24,8 +24,8 @@ using namespace cv;
 using namespace std;
 
 //width and height
-int WIDTH = 500;
-int HEIGHT = 500;
+int WIDTH = 400;
+int HEIGHT = 400;
 
 int fd = 0;
 struct termios TermOpt;
@@ -44,6 +44,7 @@ int speed;
 int key;
 
 int spindle;
+int spindleReady = 0;
 
 double pointX;
 double pointY = HEIGHT;
@@ -336,16 +337,7 @@ void drawGcode(){
 		while(getline(myfile1, baris)){
 			stringstream streamBaris (baris);
 			while(getline(streamBaris, baris1, ' ')){
-				if(baris1=="M3"){
-					spindle = 1;
-					sendport(1);
-					//cout << "Spindle ON" << '\n';
-				}
-				if(baris1=="M5"){					
-					spindle = 0;
-					sendport(2);
-					//cout << "Spindle OFF" << '\n';
-				}
+
 				if(baris1.substr(0,1)=="X"){
 					drawpointX = round(StringToDouble(baris1.substr(1)) * stepPermmX);
 					//cout << "X" << pointX << '\n';
@@ -411,12 +403,25 @@ void drawGcode(){
 					reversedrawstepY = round(interpolasi(drawstepY, 0, HEIGHT, HEIGHT, 0));
 					drawstepZ = round(interpolasi(stepZ, 0, HEIGHT*stepPermmZ, 0, HEIGHT));
 
-					deep = interpolasi(drawstepZ, 0, -10, 255, 0);
+					//spindle					
+					if(drawstepZ > 3){
+						spindle = 0;
+						sendport(2);
+						spindleReady = 1;
+						//cout << "Spindle OFF" << '\n';
+					}else{
+						if(spindleReady == 1){
+							spindle = 1;
+							sendport(1);
+							//cout << "Spindle ON" << '\n';
+						}
+					}
 
 					//image
 					Mat image3;					
 					image2.copyTo(image3);
 
+					deep = interpolasi(drawstepZ, 0, -10, 255, 0);
 					line(image2, Point(lastdrawstepX, lastdrawstepY), Point(drawstepX, reversedrawstepY), Scalar(deep,deep,255), 2, 8);
 					
 					if(spindle==1){
@@ -443,6 +448,7 @@ void drawGcode(){
 					del = 1000/speed; // ms per step
 
 					//akselerasi
+					
 					if(maxStep >= stepPermmX * 20){
 						if(i <= (stepPermmX * 20)){
 							accl = interpolasi(i, 0, (stepPermmX * 20), (del*2), del);
@@ -452,11 +458,13 @@ void drawGcode(){
 							accl = del;
 						}
 					}else{
-						accl = del*2;
+						accl = del;
 					}
+					
 
 					//pause
 					key = waitKey(accl);
+					//key = waitKey(del);
 					if(key == 112) { //jika tombol 'p' ditekan
 						jeda = 1;
 						sendport(2); //matikan bor
@@ -520,10 +528,10 @@ void menu(){
 void BuatTrackbar(){
 	//create a window called "Control"
 	//namedWindow("Control", CV_WINDOW_AUTOSIZE);
-	namedWindow("Config", CV_WINDOW_NORMAL);
+	namedWindow("Speed", CV_WINDOW_NORMAL);
 
 	//Create trackbars in "Control" window
-	cvCreateTrackbar("Speed(step/detik)", "Config", &speed, 1000); //speed (0 - 1000)
+	cvCreateTrackbar("Speed(step/detik)", "Speed", &speed, 1000); //speed (0 - 1000)
 	//cvCreateTrackbar("X(step/mm)", "Config", &stepPermmX, 1000);
 	//cvCreateTrackbar("Y(step/mm)", "Config", &stepPermmY, 1000);
 	//cvCreateTrackbar("Z(step/mm)", "Config", &stepPermmZ, 1000);
