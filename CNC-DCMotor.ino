@@ -1,6 +1,5 @@
 #include <PID.h>
 #include <encoder.h>
-#include <Servo.h>
 
 #define spindle 13
 #define pinpwmX 3
@@ -17,9 +16,9 @@ encoder myencoderX(A0,A1,INPUTPULLUP);
 encoder myencoderY(A2,A3,INPUTPULLUP);
 encoder myencoderZ(A4,A5,INPUTPULLUP);
 
-PID myPIDX(85, 0.1, 0); // KP, KI, KD
-PID myPIDY(85, 0.1, 0); // KP, KI, KD
-PID myPIDZ(85, 0.1, 0); // KP, KI, KD
+PID myPIDX(127, 0.1, 0); // KP, KI, KD
+PID myPIDY(127, 0.1, 0); // KP, KI, KD
+PID myPIDZ(127, 0.1, 0); // KP, KI, KD
 
 byte c;
 
