@@ -16,9 +16,9 @@ encoder myencoderX(A0,A1,INPUTPULLUP);
 encoder myencoderY(A2,A3,INPUTPULLUP);
 encoder myencoderZ(A4,A5,INPUTPULLUP);
 
-PID myPIDX(16, 0, 0); // KP, KI, KD
-PID myPIDY(150, 0, 0); // KP, KI, KD
-PID myPIDZ(100, 0, 0); // KP, KI, KD
+PID myPIDX(16, 0, 0); // KP, KI, KD -- adjust the PID parameter with the DC motor you have
+PID myPIDY(150, 0, 0); // KP, KI, KD -- adjust the PID parameter with the DC motor you have
+PID myPIDZ(100, 0, 0); // KP, KI, KD -- adjust the PID parameter with the DC motor you have
 
 byte c;
 
@@ -142,6 +142,7 @@ void loop(){
   Serial.print(" Pwm: ");
   Serial.println(pwmX);
 */
+
 }
 
 void cekSerial(){
