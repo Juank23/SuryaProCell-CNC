@@ -16,9 +16,9 @@ encoder myencoderX(A0,A1,INPUTPULLUP);
 encoder myencoderY(A2,A3,INPUTPULLUP);
 encoder myencoderZ(A4,A5,INPUTPULLUP);
 
-PID myPIDX(127, 0.1, 0); // KP, KI, KD
-PID myPIDY(127, 0.1, 0); // KP, KI, KD
-PID myPIDZ(127, 0.1, 0); // KP, KI, KD
+PID myPIDX(16, 0, 0); // KP, KI, KD
+PID myPIDY(150, 0, 0); // KP, KI, KD
+PID myPIDZ(100, 0, 0); // KP, KI, KD
 
 byte c;
 
@@ -49,13 +49,13 @@ void setup(){
   pinMode(motorZ1, OUTPUT);
   pinMode(motorZ2, OUTPUT);
   
-  myPIDX.LimitP(127, -127); //Pmax , Pmin
+  myPIDX.LimitP(255, -255); //Pmax , Pmin
   myPIDX.LimitI(127, -127); //Imax , Imin
   
-  myPIDY.LimitP(127, -127); //Pmax , Pmin
+  myPIDY.LimitP(255, -255); //Pmax , Pmin
   myPIDY.LimitI(127, -127); //Imax , Imin
   
-  myPIDZ.LimitP(127, -127); //Pmax , Pmin
+  myPIDZ.LimitP(255, -255); //Pmax , Pmin
   myPIDZ.LimitI(127, -127); //Imax , Imin
   
   delay(1000);
