@@ -404,7 +404,7 @@ void drawGcode(){
 					drawstepZ = round(interpolasi(stepZ, 0, HEIGHT*stepPermmZ, 0, HEIGHT));
 
 					//spindle					
-					if(drawstepZ > 5){
+					if(drawstepZ > 3){
 						spindle = 0;
 						sendport(2);
 						spindleReady = 1;
