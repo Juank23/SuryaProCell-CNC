@@ -1,7 +1,7 @@
 #include <PID.h>
 #include <encoder.h>
 
-#define spindle 13
+#define spindle 12
 #define pinpwmX 3
 #define motorX1 4
 #define motorX2 5
